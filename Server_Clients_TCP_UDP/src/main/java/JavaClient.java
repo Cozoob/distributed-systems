@@ -1,4 +1,5 @@
 import java.io.*;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
@@ -12,7 +13,7 @@ public class JavaClient {
 
         // Client provides its nickname or it is generated randomly
         Console cnsl = System.console();
-        String nickname =  cnsl.readLine("Provide your nickname:");
+        String nickname = cnsl.readLine("Provide your nickname:");
 
 
         if (nickname.isBlank()) {
@@ -41,11 +42,10 @@ public class JavaClient {
             String line = null;
 
             // Listen to the response from server
-            String finalNickname = nickname;
             new Thread(() -> {
-                try{
+                try {
                     String response;
-                    while((response = in.readLine()) != null){
+                    while ((response = in.readLine()) != null) {
                         System.out.println(response);
                     }
                 } catch (SocketException ex) {
@@ -59,13 +59,15 @@ public class JavaClient {
             while (!exitValue.equals(line)) {
 
                 // read message from user
-                // line = cnsl.readLine("me>"); // TODO HOW MAKE IT STICKY WHEN RECEIVING NEW MSG FROM OTHERS?
+                // line = cnsl.readLine("me>"); // TODO HOW TO MAKE IT STICKY WHEN RECEIVING NEW MSG FROM OTHERS?
                 line = cnsl.readLine();
 
                 // send msg to server
                 out.println(line);
             }
-        } catch (Exception ex) {
+        } catch (ConnectException ex) {
+            System.out.println("Connection has been refused.");
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }

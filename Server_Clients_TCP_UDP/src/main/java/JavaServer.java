@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -20,13 +21,12 @@ public class JavaServer {
             // create socket
             serverSocket = new ServerSocket(portNumber);
 
-            while(true){
+            while (true) {
 
                 // accept client
                 Socket clientSocket = serverSocket.accept();
 
                 // in & out streams
-                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
                 // Show which client has been connected
@@ -39,10 +39,10 @@ public class JavaServer {
                 thread.start();
             }
         } catch (IOException e) {
+            System.out.println("HERE");
             e.printStackTrace();
-        }
-        finally{
-            if (serverSocket != null){
+        } finally {
+            if (serverSocket != null) {
                 try {
                     serverSocket.close();
                 } catch (IOException ex) {
@@ -58,6 +58,7 @@ public class JavaServer {
         private final Socket clientSocket;
         private final HashMap<String, Pair> clients;
         public final String nickname;
+
         public ClientHandler(Socket socket, String nickname, HashMap<String, Pair> clients) {
             this.clientSocket = socket;
             this.nickname = nickname;
@@ -73,20 +74,32 @@ public class JavaServer {
                 out = new PrintWriter(clientSocket.getOutputStream(), true);
                 in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
+                // Send message for other users that I joined
+                for (String otherUserNickname : clients.keySet()) {
+                    if (Objects.equals(otherUserNickname, nickname)) {
+                        // Don't send the message to the sender
+                        continue;
+                    }
+
+                    Socket otherSocket = clients.get(otherUserNickname).getSocket();
+                    PrintWriter otherOut = new PrintWriter(otherSocket.getOutputStream(), true);
+                    otherOut.println(nickname + " joined the chat.");
+                }
+
                 // printing out the received message from client
                 String line;
-                Boolean isConnected;
-                while((line = in.readLine()) != null){
+                boolean isConnected;
+                while ((line = in.readLine()) != null) {
                     // Check if the user want to close the connection
                     isConnected = !line.equals(CLOSE_CONNECTION_VALUE);
 
-                    if(!isConnected){
+                    if (!isConnected) {
                         System.out.println(nickname + " disconnected :(");
                     }
 
                     // Send message for other users
-                    for(String otherUserNickname : clients.keySet()){
-                        if(Objects.equals(otherUserNickname, nickname)){
+                    for (String otherUserNickname : clients.keySet()) {
+                        if (Objects.equals(otherUserNickname, nickname)) {
                             // Don't send the message to the sender
                             continue;
                         }
@@ -95,21 +108,23 @@ public class JavaServer {
                         PrintWriter otherOut = new PrintWriter(otherSocket.getOutputStream(), true);
 
                         // Check if the user want to close the connection, send this information to others
-                        if(!isConnected){
-                            otherOut.println(nickname + " disconnected :(");
+                        if (!isConnected) {
+                            otherOut.println(nickname + " left the chat.");
                         } else {
                             otherOut.println(nickname + ">" + line);
                         }
                     }
                 }
+            } catch (SocketException ex) {
+                System.out.println(nickname + " has been lost :(");
             } catch (IOException ex) {
                 ex.printStackTrace();
             } finally {
-                try{
-                    if(in != null){
+                try {
+                    if (in != null) {
                         in.close();
                     }
-                    if(out != null) {
+                    if (out != null) {
                         out.close();
                     }
                     clientSocket.close();
@@ -126,7 +141,8 @@ public class JavaServer {
     public static class Pair {
         private final Thread thread;
         private final Socket socket;
-        public Pair(Thread thread, Socket socket){
+
+        public Pair(Thread thread, Socket socket) {
             this.thread = thread;
             this.socket = socket;
         }
