@@ -54,6 +54,7 @@ public class JavaServer {
 
     // ClientHandler Class
     public static class ClientHandler implements Runnable {
+        private static final String CLOSE_CONNECTION_VALUE = "--exit";
         private final Socket clientSocket;
         private final HashMap<String, Pair> clients;
         public final String nickname;
@@ -74,16 +75,31 @@ public class JavaServer {
 
                 // printing out the received message from client
                 String line;
+                Boolean isConnected;
                 while((line = in.readLine()) != null){
+                    // Check if the user want to close the connection
+                    isConnected = !line.equals(CLOSE_CONNECTION_VALUE);
+
+                    if(!isConnected){
+                        System.out.println(nickname + " disconnected :(");
+                    }
+
                     // Send message for other users
                     for(String otherUserNickname : clients.keySet()){
                         if(Objects.equals(otherUserNickname, nickname)){
                             // Don't send the message to the sender
                             continue;
                         }
+
                         Socket otherSocket = clients.get(otherUserNickname).getSocket();
                         PrintWriter otherOut = new PrintWriter(otherSocket.getOutputStream(), true);
-                        otherOut.println(nickname + ">" + line);
+
+                        // Check if the user want to close the connection, send this information to others
+                        if(!isConnected){
+                            otherOut.println(nickname + " disconnected :(");
+                        } else {
+                            otherOut.println(nickname + ">" + line);
+                        }
                     }
                 }
             } catch (IOException ex) {

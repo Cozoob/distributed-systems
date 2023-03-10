@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
@@ -47,6 +48,8 @@ public class JavaClient {
                     while((response = in.readLine()) != null){
                         System.out.println(response);
                     }
+                } catch (SocketException ex) {
+                    System.out.println("Connection to the server has been closed.");
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -59,17 +62,11 @@ public class JavaClient {
                 // line = cnsl.readLine("me>"); // TODO HOW MAKE IT STICKY WHEN RECEIVING NEW MSG FROM OTHERS?
                 line = cnsl.readLine();
 
-                // check if user want to leave
-                if(exitValue.equals(line)){
-                    continue;
-                }
-
                 // send msg to server
                 out.println(line);
-                //out.flush(); // ensures that all data that has been written to that stream is output
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
