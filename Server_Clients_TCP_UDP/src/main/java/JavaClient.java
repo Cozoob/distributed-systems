@@ -8,49 +8,65 @@ import java.util.Random;
 
 public class JavaClient {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
+        // Constant value
+        final String exitValue = "--exit";
 
+        // Client provides its nickname or it is generated randomly
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Provide your nickname:");
-        String nickname = reader.readLine();
-        if(nickname.isBlank()){
+        String nickname = null;
+        try {
+            nickname = reader.readLine();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        if (nickname == null || nickname.isBlank()) {
             byte[] arr = new byte[4];
             new Random().nextBytes(arr);
             nickname = new String(arr, StandardCharsets.UTF_8);
         }
 
-        System.out.println("JAVA TCP CLIENT \"" + nickname + "\"");
+        // Welcome messages for client
+        System.out.println("Welcome \"" + nickname + "\"!");
+        System.out.println("Commands you can use:\n" + "--exit \t\t\t close the connection");
+
         String hostName = "localhost";
         int portNumber = 12345;
-        Socket socket = null;
 
-        try {
-            // create socket
-            socket = new Socket(hostName, portNumber);
+        // Create socket
+        try (Socket socket = new Socket(hostName, portNumber)) {
 
-            // in & out streams
+            // in/out streams from/to server
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            //BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            // send nickname to server...
+            // send nickname to server
             out.println(nickname);
 
-            while(true){
-                // read message from user
-                String line = reader.readLine();
+            String line = null;
 
-                // send msg, read response
+            while (!exitValue.equals(line)) {
+
+                // read message from user
+                line = reader.readLine();
+
+                // send msg to server
                 out.println(line);
+                out.flush(); // ensures that all data that has been written to that stream is output
+
                 // String response = in.readLine();
                 // System.out.println("Server: " + response);
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (socket != null){
-                socket.close();
-                System.out.println("The server connection has been closed.");
-            }
+        }
+
+        try {
+            reader.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 
