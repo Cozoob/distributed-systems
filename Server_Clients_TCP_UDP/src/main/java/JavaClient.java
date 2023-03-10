@@ -3,11 +3,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
-public class JavaTcpClient {
+public class JavaClient {
 
     public static void main(String[] args) throws IOException {
 
@@ -31,7 +30,7 @@ public class JavaTcpClient {
 
             // in & out streams
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            //BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             // send nickname to server...
             out.println(nickname);
@@ -42,14 +41,15 @@ public class JavaTcpClient {
 
                 // send msg, read response
                 out.println(line);
-                String response = in.readLine();
-                System.out.println("Server: " + response);
+                // String response = in.readLine();
+                // System.out.println("Server: " + response);
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (socket != null){
                 socket.close();
+                System.out.println("The server connection has been closed.");
             }
         }
     }
