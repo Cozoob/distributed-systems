@@ -4,12 +4,13 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 
 public class JavaServer {
 
     public static void main(String[] args) {
-        ArrayList<ServerSocket> clients = new ArrayList<>();
+        HashMap<String, Pair> clients = new HashMap<>();
 
         System.out.println("JAVA TCP SERVER");
         int portNumber = 12345;
@@ -33,8 +34,9 @@ public class JavaServer {
                 System.out.println(nickname + " connected to the server!");
 
                 // Create new thread for the client
-                ClientHandler clientHandler = new ClientHandler(clientSocket, nickname);
-                new Thread(clientHandler).start();
+                Thread thread = new Thread(new ClientHandler(clientSocket, nickname, clients));
+                clients.put(nickname, new Pair(thread, clientSocket));
+                thread.start();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -51,12 +53,14 @@ public class JavaServer {
     }
 
     // ClientHandler Class
-    private static class ClientHandler implements Runnable {
+    public static class ClientHandler implements Runnable {
         private final Socket clientSocket;
-        private final String nickname;
-        public ClientHandler(Socket socket, String nickname) {
+        private final HashMap<String, Pair> clients;
+        public final String nickname;
+        public ClientHandler(Socket socket, String nickname, HashMap<String, Pair> clients) {
             this.clientSocket = socket;
             this.nickname = nickname;
+            this.clients = clients;
         }
 
         @Override
@@ -71,10 +75,16 @@ public class JavaServer {
                 // printing out the received message from client
                 String line;
                 while((line = in.readLine()) != null){
-                    // TODO TO DELETE - server shouldn't show clients messages
-                    String msg = nickname + ">" + line;
-                    System.out.println("SERVER: " + msg);
-                    out.println(msg);
+                    // Send message for other users
+                    for(String otherUserNickname : clients.keySet()){
+                        if(Objects.equals(otherUserNickname, nickname)){
+                            // Don't send the message to the sender
+                            continue;
+                        }
+                        Socket otherSocket = clients.get(otherUserNickname).getSocket();
+                        PrintWriter otherOut = new PrintWriter(otherSocket.getOutputStream(), true);
+                        otherOut.println(nickname + ">" + line);
+                    }
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -87,10 +97,30 @@ public class JavaServer {
                         out.close();
                     }
                     clientSocket.close();
+                    // Delete this client from hashmap
+                    clients.remove(nickname);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
             }
+        }
+    }
+
+    // Pair class
+    public static class Pair {
+        private final Thread thread;
+        private final Socket socket;
+        public Pair(Thread thread, Socket socket){
+            this.thread = thread;
+            this.socket = socket;
+        }
+
+        public Socket getSocket() {
+            return socket;
+        }
+
+        public Thread getThread() {
+            return thread;
         }
     }
 }
