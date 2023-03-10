@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class JavaServer {
+    // Constant value
+    private final static String NICKNAME_NOT_UNIQUE = "--nickname-error";
 
     public static void main(String[] args) {
         HashMap<String, Pair> clients = new HashMap<>();
@@ -29,8 +31,15 @@ public class JavaServer {
                 // in & out streams
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-                // Show which client has been connected
+                // Check the nickname
                 String nickname = in.readLine();
+                if(clients.containsKey(nickname)){
+                    new PrintWriter(clientSocket.getOutputStream(), true).println(NICKNAME_NOT_UNIQUE);
+                    clientSocket.close();
+                    continue;
+                }
+
+                // Show which client has been connected
                 System.out.println(nickname + " connected to the server!");
 
                 // Create new thread for the client

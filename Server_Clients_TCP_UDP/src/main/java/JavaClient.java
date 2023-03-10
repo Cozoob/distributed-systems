@@ -6,10 +6,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 public class JavaClient {
-
+    // Constant value
+    private final static String EXIT_VALUE = "--exit";
+    private final static String NICKNAME_NOT_UNIQUE = "--nickname-error";
     public static void main(String[] args) {
-        // Constant value
-        final String exitValue = "--exit";
 
         // Client provides its nickname or it is generated randomly
         Console cnsl = System.console();
@@ -42,9 +42,16 @@ public class JavaClient {
             String line = null;
 
             // Listen to the response from server
+            String finalNickname = nickname;
             new Thread(() -> {
                 try {
                     String response;
+                    // check if nickname error
+                    if(in.readLine().equals(NICKNAME_NOT_UNIQUE)){
+                        System.out.println("Connection to the server has been closed since the nickname \"" + finalNickname + "\" is not unique.");
+                       return;
+                    }
+
                     while ((response = in.readLine()) != null) {
                         System.out.println(response);
                     }
@@ -56,7 +63,7 @@ public class JavaClient {
             }).start();
 
             // Send messages to server
-            while (!exitValue.equals(line)) {
+            while (!EXIT_VALUE.equals(line)) {
 
                 // read message from user
                 // line = cnsl.readLine("me>"); // TODO HOW TO MAKE IT STICKY WHEN RECEIVING NEW MSG FROM OTHERS?
