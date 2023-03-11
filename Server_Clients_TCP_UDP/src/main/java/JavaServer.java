@@ -11,6 +11,7 @@ import java.util.Objects;
 public class JavaServer {
     // Constant value
     private final static String NICKNAME_NOT_UNIQUE = "--nickname-error";
+    private final static String NICKNAME_ASSIGNED = "--nickname-assigned";
 
     public static void main(String[] args) {
         HashMap<String, Pair> clients = new HashMap<>();
@@ -33,10 +34,13 @@ public class JavaServer {
 
                 // Check the nickname
                 String nickname = in.readLine();
-                if(clients.containsKey(nickname)){
-                    new PrintWriter(clientSocket.getOutputStream(), true).println(NICKNAME_NOT_UNIQUE);
+                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                if (clients.containsKey(nickname)) {
+                    out.println(NICKNAME_NOT_UNIQUE);
                     clientSocket.close();
                     continue;
+                } else {
+                    out.println(NICKNAME_ASSIGNED);
                 }
 
                 // Show which client has been connected
@@ -92,6 +96,7 @@ public class JavaServer {
 
                     Socket otherSocket = clients.get(otherUserNickname).getSocket();
                     PrintWriter otherOut = new PrintWriter(otherSocket.getOutputStream(), true);
+//                    otherOut.println("");
                     otherOut.println(nickname + " joined the chat.");
                 }
 

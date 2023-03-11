@@ -9,6 +9,8 @@ public class JavaClient {
     // Constant value
     private final static String EXIT_VALUE = "--exit";
     private final static String NICKNAME_NOT_UNIQUE = "--nickname-error";
+    private final static String NICKNAME_ASSIGNED = "--nickname-assigned";
+
     public static void main(String[] args) {
 
         // Client provides its nickname or it is generated randomly
@@ -24,7 +26,7 @@ public class JavaClient {
 
         // Welcome messages for client
         System.out.println("Welcome \"" + nickname + "\"!");
-        System.out.println("Commands you can use:\n" + "--exit \t close the connection");
+        System.out.println("\nCommands you can use:\n" + "--exit \t close the connection\n");
 
         String hostName = "localhost";
         int portNumber = 12345;
@@ -39,19 +41,18 @@ public class JavaClient {
             // send nickname to server
             out.println(nickname);
 
-            String line = null;
+            // acknowledge nickname assignment
+            while (!NICKNAME_ASSIGNED.equals(in.readLine())) {
+                if (in.readLine().equals(NICKNAME_NOT_UNIQUE)) {
+                    System.out.println("Connection to the server has been closed since the nickname \"" + nickname + "\" is not unique.");
+                    return;
+                }
+            }
 
             // Listen to the response from server
-            String finalNickname = nickname;
             new Thread(() -> {
                 try {
                     String response;
-                    // check if nickname error
-                    if(in.readLine().equals(NICKNAME_NOT_UNIQUE)){
-                        System.out.println("Connection to the server has been closed since the nickname \"" + finalNickname + "\" is not unique.");
-                       return;
-                    }
-
                     while ((response = in.readLine()) != null) {
                         System.out.println(response);
                     }
@@ -63,11 +64,15 @@ public class JavaClient {
             }).start();
 
             // Send messages to server
+            String line = null;
             while (!EXIT_VALUE.equals(line)) {
 
                 // read message from user
-                // line = cnsl.readLine("me>"); // TODO HOW TO MAKE IT STICKY WHEN RECEIVING NEW MSG FROM OTHERS?
                 line = cnsl.readLine();
+                if (line == null) {
+                    // Do not send null message
+                    break;
+                }
 
                 // send msg to server
                 out.println(line);
