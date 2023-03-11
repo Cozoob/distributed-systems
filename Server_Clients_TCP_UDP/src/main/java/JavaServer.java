@@ -2,9 +2,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.net.*;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -12,22 +12,25 @@ public class JavaServer {
     // Constant value
     private final static String NICKNAME_NOT_UNIQUE = "--nickname-error";
     private final static String NICKNAME_ASSIGNED = "--nickname-assigned";
+    private final static Integer PORT_NUMBER = 12345;
 
     public static void main(String[] args) {
         HashMap<String, Pair> clients = new HashMap<>();
 
         System.out.println("JAVA TCP SERVER");
-        int portNumber = 12345;
-        ServerSocket serverSocket = null;
+        ServerSocket serverSocketTCP = null;
 
         try {
-            // create socket
-            serverSocket = new ServerSocket(portNumber);
+            // create socket for TCP
+            serverSocketTCP = new ServerSocket(PORT_NUMBER);
+
+            // Listen to the possible received messages via UDP
+            handleUDPMessage();
 
             while (true) {
 
                 // accept client
-                Socket clientSocket = serverSocket.accept();
+                Socket clientSocket = serverSocketTCP.accept();
 
                 // in & out streams
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -55,9 +58,9 @@ public class JavaServer {
             System.out.println("HERE");
             e.printStackTrace();
         } finally {
-            if (serverSocket != null) {
+            if (serverSocketTCP != null) {
                 try {
-                    serverSocket.close();
+                    serverSocketTCP.close();
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -65,8 +68,39 @@ public class JavaServer {
         }
     }
 
+    public static void handleUDPMessage() {
+        new Thread(() -> {
+            // create socket for UDP
+            try (DatagramSocket serverSocketUDP = new DatagramSocket(PORT_NUMBER)) {
+                while (true) {
+                    // Wait for the message from client
+                    byte[] receiveBuffer = new byte[1024];
+                    Arrays.fill(receiveBuffer, (byte) 0);
+                    DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+                    serverSocketUDP.receive(receivePacket);
+
+                    // Convert message to String and print it
+                    String[] receivedMsg = new String(receivePacket.getData()).split(System.lineSeparator(), 2);
+
+                    // Read first line which is nickname of the sender
+                    String nickname = receivedMsg[0];
+                    String art = receivedMsg[1];
+
+                    // TODO DELETE
+                    System.out.println("nickname: " + nickname);
+                    System.out.println(art);
+                }
+            } catch (SocketException ex) {
+                System.out.println("SOCKET UDP EXCEPTION");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+    }
+
     // ClientHandler Class
-    public static class ClientHandler implements Runnable {
+    private static class ClientHandler implements Runnable {
         private static final String CLOSE_CONNECTION_VALUE = "--exit";
         private final Socket clientSocket;
         private final HashMap<String, Pair> clients;
@@ -96,7 +130,6 @@ public class JavaServer {
 
                     Socket otherSocket = clients.get(otherUserNickname).getSocket();
                     PrintWriter otherOut = new PrintWriter(otherSocket.getOutputStream(), true);
-//                    otherOut.println("");
                     otherOut.println(nickname + " joined the chat.");
                 }
 
@@ -152,7 +185,7 @@ public class JavaServer {
     }
 
     // Pair class
-    public static class Pair {
+    private static class Pair {
         private final Thread thread;
         private final Socket socket;
 
