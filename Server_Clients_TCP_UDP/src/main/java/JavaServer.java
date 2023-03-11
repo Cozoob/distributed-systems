@@ -58,7 +58,6 @@ public class JavaServer {
                 thread.start();
             }
         } catch (IOException e) {
-            System.out.println("HERE");
             e.printStackTrace();
         } finally {
             if (serverSocketTCP != null) {
@@ -109,10 +108,8 @@ public class JavaServer {
                     }
 
                 }
-            } catch (SocketException ex) {
-                System.out.println("SOCKET UDP EXCEPTION");
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         }).start();
     }

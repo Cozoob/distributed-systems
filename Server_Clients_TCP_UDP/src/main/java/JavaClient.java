@@ -144,9 +144,7 @@ public class JavaClient {
             byte[] sendBuffer = message.getBytes();
             DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, InetAddress.getByName(HOST_NAME), PORT_NUMBER);
             socket.send(sendPacket);
-        } catch (SocketException ex) {
-            // TODO
-            System.out.println("SOCKET EXCEPTION");
+        } catch (SocketException ignored) {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -166,20 +164,9 @@ public class JavaClient {
                     // Convert message to String and print it
                     String receivedMsg = new String(receivePacket.getData());
                     System.out.println(receivedMsg);
-
-//                    // Read first line which is nickname of the sender
-//                    String nickname = receivedMsg[0];
-//                    String art = receivedMsg[1];
-//
-//                    // TODO DELETE
-//                    System.out.println("nickname: " + nickname);
-//                    System.out.println(art);
                 }
-            } catch (SocketException ex) {
-                System.out.println("SOCKET UDP EXCEPTION");
+            } catch (IOException ex) {
                 ex.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }).start();
     }
