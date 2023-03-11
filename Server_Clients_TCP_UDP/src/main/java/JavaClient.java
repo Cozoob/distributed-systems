@@ -3,6 +3,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -42,6 +43,7 @@ public class JavaClient {
 
         // Create socket
         try (Socket socket = new Socket(HOST_NAME, PORT_NUMBER)) {
+            handleUDPMessage(socket.getLocalPort());
 
             // in/out streams from/to server
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -124,7 +126,7 @@ public class JavaClient {
             // Read ASCII ART to String
             Path filePath = Path.of(ASCII_ARTS_PATH.get(asciiArt));
             String art = Files.readString(filePath);
-            String message = nickname + "\n" + art;
+            String message = nickname + "$" + art;
 
             // Show the client what they sent
             System.out.println("You sent:");
@@ -140,6 +142,38 @@ public class JavaClient {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    private static void handleUDPMessage(int myPort) {
+        new Thread(() -> {
+            // create socket for UDP
+            try (DatagramSocket serverSocketUDP = new DatagramSocket(myPort)) {
+                while (true) {
+                    // Wait for the message from the server
+                    byte[] receiveBuffer = new byte[1024];
+                    Arrays.fill(receiveBuffer, (byte) 0);
+                    DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+                    serverSocketUDP.receive(receivePacket);
+
+                    // Convert message to String and print it
+                    String receivedMsg = new String(receivePacket.getData());
+                    System.out.println(receivedMsg);
+
+//                    // Read first line which is nickname of the sender
+//                    String nickname = receivedMsg[0];
+//                    String art = receivedMsg[1];
+//
+//                    // TODO DELETE
+//                    System.out.println("nickname: " + nickname);
+//                    System.out.println(art);
+                }
+            } catch (SocketException ex) {
+                System.out.println("SOCKET UDP EXCEPTION");
+                ex.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private static void printExistingASCIIARTS() {

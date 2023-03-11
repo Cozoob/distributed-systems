@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,7 +13,9 @@ public class JavaServer {
     // Constant value
     private final static String NICKNAME_NOT_UNIQUE = "--nickname-error";
     private final static String NICKNAME_ASSIGNED = "--nickname-assigned";
+    private final static String HOST_NAME = "localhost";
     private final static Integer PORT_NUMBER = 12345;
+    private final static String SPECIAL_EVENT_MARK = "***";
 
     public static void main(String[] args) {
         HashMap<String, Pair> clients = new HashMap<>();
@@ -25,7 +28,7 @@ public class JavaServer {
             serverSocketTCP = new ServerSocket(PORT_NUMBER);
 
             // Listen to the possible received messages via UDP
-            handleUDPMessage();
+            handleUDPMessage(clients);
 
             while (true) {
 
@@ -47,7 +50,7 @@ public class JavaServer {
                 }
 
                 // Show which client has been connected
-                System.out.println(nickname + " connected to the server!");
+                System.out.println(SPECIAL_EVENT_MARK + nickname + " connected to the server!" + SPECIAL_EVENT_MARK);
 
                 // Create new thread for the client
                 Thread thread = new Thread(new ClientHandler(clientSocket, nickname, clients));
@@ -68,7 +71,7 @@ public class JavaServer {
         }
     }
 
-    public static void handleUDPMessage() {
+    public static void handleUDPMessage(HashMap<String, Pair> clients) {
         new Thread(() -> {
             // create socket for UDP
             try (DatagramSocket serverSocketUDP = new DatagramSocket(PORT_NUMBER)) {
@@ -80,15 +83,31 @@ public class JavaServer {
                     serverSocketUDP.receive(receivePacket);
 
                     // Convert message to String and print it
-                    String[] receivedMsg = new String(receivePacket.getData()).split(System.lineSeparator(), 2);
+                    String[] receivedMsg = new String(receivePacket.getData()).split("\\$", 2);
 
                     // Read first line which is nickname of the sender
-                    String nickname = receivedMsg[0];
+                    String nickname = receivedMsg[0].trim();
                     String art = receivedMsg[1];
 
-                    // TODO DELETE
-                    System.out.println("nickname: " + nickname);
-                    System.out.println(art);
+                    // Send to other users
+                    for (String otherNickname : clients.keySet()) {
+                        if (otherNickname.equals(nickname)) {
+                            // Do not send message to the sender
+                            continue;
+                        }
+                        try (DatagramSocket otherSocket = new DatagramSocket()) {
+                            int otherPort = clients.get(otherNickname).getSocket().getPort();
+
+                            String message = nickname + "(UDP)>\n" + art;
+
+                            byte[] sendBuffer = message.getBytes();
+                            DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, InetAddress.getByName(HOST_NAME), otherPort);
+                            otherSocket.send(sendPacket);
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+
                 }
             } catch (SocketException ex) {
                 System.out.println("SOCKET UDP EXCEPTION");
@@ -96,7 +115,6 @@ public class JavaServer {
                 e.printStackTrace();
             }
         }).start();
-
     }
 
     // ClientHandler Class
@@ -130,7 +148,7 @@ public class JavaServer {
 
                     Socket otherSocket = clients.get(otherUserNickname).getSocket();
                     PrintWriter otherOut = new PrintWriter(otherSocket.getOutputStream(), true);
-                    otherOut.println(nickname + " joined the chat.");
+                    otherOut.println(SPECIAL_EVENT_MARK + nickname + " joined the chat." + SPECIAL_EVENT_MARK);
                 }
 
                 // printing out the received message from client
@@ -141,7 +159,7 @@ public class JavaServer {
                     isConnected = !line.equals(CLOSE_CONNECTION_VALUE);
 
                     if (!isConnected) {
-                        System.out.println(nickname + " disconnected :(");
+                        System.out.println(SPECIAL_EVENT_MARK + nickname + " disconnected :(" + SPECIAL_EVENT_MARK);
                     }
 
                     // Send message for other users
@@ -156,7 +174,7 @@ public class JavaServer {
 
                         // Check if the user want to close the connection, send this information to others
                         if (!isConnected) {
-                            otherOut.println(nickname + " left the chat.");
+                            otherOut.println(SPECIAL_EVENT_MARK + nickname + " left the chat." + SPECIAL_EVENT_MARK);
                         } else {
                             otherOut.println(nickname + ">" + line);
                         }
