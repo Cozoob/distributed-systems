@@ -12,6 +12,8 @@ public class JavaClient {
     // Constant value
     private final static String HOST_NAME = "localhost";
     private final static Integer PORT_NUMBER = 12345;
+    private final static String MULTICAST_IP = "230.0.0.0";
+    private final static Integer MULTICAST_PORT = 4000;
     private final static String EXIT_VALUE = "--exit";
     private final static String UDP_VALUE = "--U";
     private final static String MULTICAST_VALUE = "--M";
@@ -43,7 +45,13 @@ public class JavaClient {
 
         // Create socket
         try (Socket socket = new Socket(HOST_NAME, PORT_NUMBER)) {
+            // Handle udp messages
             handleUDPMessage(socket.getLocalPort());
+
+            // Handle multicast messages
+            new Thread(new MulticastReceiver()).start();
+
+            // TPC:
 
             // in/out streams from/to server
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -89,7 +97,7 @@ public class JavaClient {
                 switch (line) {
                     case HELP_VALUE -> printHelpMessage();
                     case UDP_VALUE -> sendMessageUDP(nickname);
-                    case MULTICAST_VALUE -> sendMulticastMessage(line);
+                    case MULTICAST_VALUE -> handleSendingMulticastMessage(nickname);
                     // send msg to server
                     default -> out.println(line);
                 }
@@ -184,11 +192,6 @@ public class JavaClient {
         System.out.println("---  ASCII ARTS  ---");
     }
 
-    private static void sendMulticastMessage(String message) {
-        // TODO
-        System.out.println("TO DO");
-    }
-
     private static void printHelpMessage() {
         System.out.println("""
 
@@ -199,6 +202,48 @@ public class JavaClient {
                 --help \t show help
                                 
                 """);
+    }
+
+    private static void handleSendingMulticastMessage(String nickname) {
+        System.out.println("PROVIDE MULTICAST MESSAGE: ");
+        String msg = cnsl.readLine();
+        sendMulticastMessage(nickname + "(MULTICAST)>" + msg);
+    }
+
+    private static void sendMulticastMessage(String message) {
+        try (MulticastSocket socket = new MulticastSocket()) {
+            InetAddress multicastAddress = InetAddress.getByName(MULTICAST_IP);
+            byte[] buf = message.getBytes();
+
+            DatagramPacket packet = new DatagramPacket(buf, buf.length, multicastAddress, MULTICAST_PORT);
+            socket.send(packet);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private static class MulticastReceiver implements Runnable {
+
+        @Override
+        public void run() {
+            try (MulticastSocket socket = new MulticastSocket(MULTICAST_PORT)) {
+                InetAddress mcastadrr = InetAddress.getByName(MULTICAST_IP);
+                InetSocketAddress group = new InetSocketAddress(mcastadrr, MULTICAST_PORT);
+                NetworkInterface netIf = NetworkInterface.getByName("bge0");
+                socket.joinGroup(group, netIf);
+
+                byte[] buf = new byte[1024];
+
+                while (true) {
+                    DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                    socket.receive(packet);
+                    String msg = new String(packet.getData());
+                    System.out.println(msg);
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
 }
