@@ -15,7 +15,12 @@ async def root(request: Request) -> Response:
 
 @router.get("/weather")
 async def submit_form(request: Request, city: str):
-    return templates.TemplateResponse("error.html", {"request": request})
+
+    if not city.isalpha():
+        # check if contains only letters
+        return templates.TemplateResponse("error.html", {"request": request})
+
+    return templates.TemplateResponse("city.html", {"request": request, "val": "suprise"})
 
     # if not city:
     #     return templates.TemplateResponse("inputForm.html", {"message": "error"})
