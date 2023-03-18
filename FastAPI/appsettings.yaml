@@ -1,8 +1,8 @@
 # server configuration
 uvicorn:
-  host: 0.0.0.0
+  host: 127.0.0.1
   port: 8000
-  reload: false
+  reload: true
 api_config:
   title: Flight FastApi Server
   docs_url: /docs
