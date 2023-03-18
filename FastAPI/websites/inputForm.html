@@ -2,16 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Search for flights and weather</title>
+    <title>Search for weather</title>
 </head>
 <body>
-    <h1>Choose cities to fly from/to</h1>
-    <form method="get" action="/todo">
-        <label for="start-city">Fly from:</label>
-        <input id="start-city" placeholder="Enter a start city of your trip" required>
+    <h1>Check weather</h1>
+    <form method="get" action="/weather">
+        <label for="city">Weather in:</label>
+        <input id="city" name="city" placeholder="Enter a city name in English" required>
 
-        <label for="end-city">Fly to:</label>
-        <input id="end-city" placeholder="Enter an final city of your trip" required>
+        <input type="submit" value="Submit">
     </form>
 </body>
 </html>

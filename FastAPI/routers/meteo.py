@@ -1,6 +1,3 @@
-import aiohttp
-import asyncio
-
 import requests
 from fastapi import APIRouter
 from config.settings import get_settings
@@ -27,8 +24,13 @@ router = APIRouter()
 # async def get_uuids():
 #     return {"uuids": await task()}
 
-@router.get("/weather/london")
-async def get_london():
+# @router.get("/weather")
+# async def submit_form():
+#
+
+
+@router.get("/weather/{city}")
+async def get_london(city: str):
     params = {
         'key': API_KEY,
         'place_id': 'london'
