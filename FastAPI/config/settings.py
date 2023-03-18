@@ -17,9 +17,16 @@ class APIConfigSettings(BaseSettings):
     docs_url: str
 
 
+class MeteoSourceSettings(BaseSettings):
+    """ Settings for MeteoSource external server """
+    url: str
+    api_key: str
+
+
 class Settings(BaseSettings):
     uvicorn: UvicornSettings
     api_config: APIConfigSettings
+    meteo_source_config: MeteoSourceSettings
 
 
 def load_from_yaml() -> Any:

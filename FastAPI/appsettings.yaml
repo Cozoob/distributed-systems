@@ -6,3 +6,7 @@ uvicorn:
 api_config:
   title: Flight FastApi Server
   docs_url: /docs
+# meteosource configuration
+meteo_source_config:
+  url: https://www.meteosource.com/api/v1/free/point
+  api_key: wbzvu9fc2vo3cdn306ga2exz0lm5c1a9kp1hscrc
