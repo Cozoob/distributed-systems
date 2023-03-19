@@ -4,7 +4,7 @@ uvicorn:
   port: 8000
   reload: true
 api_config:
-  title: Flight FastApi Server
+  title: Weather FastApi Server
   docs_url: /docs
 # meteosource configuration
 meteo_source_config:
