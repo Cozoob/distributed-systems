@@ -3,12 +3,13 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, Response
 from starlette.templating import Jinja2Templates
 from routers.meteo import MeteoForecast
+from routers.m3o import M3OForecast
 from schemas.responses import WeatherResponse
 
 router = APIRouter()
 templates = Jinja2Templates(directory="./websites")
 ERROR_PAGE = "error.html"
-EXTERNAL_SERVICES = [MeteoForecast()]
+EXTERNAL_SERVICES = [MeteoForecast(), M3OForecast()]
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -58,16 +59,16 @@ async def submit_form(request: Request, city: str, days: int):
         amount_of_data = len(info)
 
         # averages
-        avg_temp = sum(map(lambda response: response.temp, info)) / amount_of_data
-        avg_min_temp = sum(map(lambda response: response.temp_min, info)) / amount_of_data
-        avg_max_temp = sum(map(lambda response: response.temp_max, info)) / amount_of_data
-        avg_wind_speed = sum(map(lambda response: response.wind_speed, info)) / amount_of_data
+        avg_temp = round(sum(map(lambda response: response.temp, info)) / amount_of_data, 2)
+        avg_min_temp = round(sum(map(lambda response: response.temp_min, info)) / amount_of_data, 2)
+        avg_max_temp = round(sum(map(lambda response: response.temp_max, info)) / amount_of_data, 2)
+        avg_wind_speed = round(sum(map(lambda response: response.wind_speed, info)) / amount_of_data, 2)
 
         # variances
-        var_temp = sum(map(lambda response: (response.temp - avg_temp) ** 2, info)) / amount_of_data
-        var_min_temp = sum(map(lambda response: (response.temp_min - avg_min_temp) ** 2, info)) / amount_of_data
-        var_max_temp = sum(map(lambda response: (response.temp_max - avg_max_temp) ** 2, info)) / amount_of_data
-        var_wind_speed = sum(map(lambda response: (response.wind_speed - avg_wind_speed) ** 2, info)) / amount_of_data
+        var_temp = round(sum(map(lambda response: (response.temp - avg_temp) ** 2, info)) / amount_of_data, 5)
+        var_min_temp = round(sum(map(lambda response: (response.temp_min - avg_min_temp) ** 2, info)) / amount_of_data, 5)
+        var_max_temp = round(sum(map(lambda response: (response.temp_max - avg_max_temp) ** 2, info)) / amount_of_data, 5)
+        var_wind_speed = round(sum(map(lambda response: (response.wind_speed - avg_wind_speed) ** 2, info)) / amount_of_data, 5)
 
         for response in info:
             if response.summary:

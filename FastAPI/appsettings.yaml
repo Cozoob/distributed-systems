@@ -10,3 +10,6 @@ api_config:
 meteo_source_config:
   url: https://www.meteosource.com/api/v1/free
   api_key: wbzvu9fc2vo3cdn306ga2exz0lm5c1a9kp1hscrc
+m3o_source_config:
+  url: https://api.m3o.com/v1/weather/Forecast
+  api_key: MmNmOGVmYTQtOTMxNC00MzkwLWE5ODYtNTUwNDVhMGIzZDMz

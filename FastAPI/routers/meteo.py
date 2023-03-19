@@ -2,7 +2,6 @@ import requests
 from fastapi import APIRouter
 from config.settings import get_settings
 from json import JSONDecodeError
-from starlette.templating import Jinja2Templates
 from schemas.responses import ForecastExternalResponse
 
 meteo_source_config = get_settings().meteo_source_config
@@ -10,8 +9,6 @@ URL = meteo_source_config.url
 API_KEY = meteo_source_config.api_key
 
 router = APIRouter()
-templates = Jinja2Templates(directory="./websites")
-ERROR_PAGE = "error.html"
 
 
 class MeteoForecast:

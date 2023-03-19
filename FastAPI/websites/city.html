@@ -9,14 +9,14 @@
   {% for date in data.keys() %}
         <h2>Date: {{ date }}</h2>
       {% for forecast_obj in data[date] %}
-        <p>Average min temperature: {{ forecast_obj.avg_temp_min }} </p>
-        <p>Variance min temperature: {{ forecast_obj.var_temp_min }} </p>
-        <p>Average max temperature: {{ forecast_obj.avg_temp_max }} </p>
-        <p>Variance max temperature: {{ forecast_obj.var_temp_max }} </p>
-        <p>Average temperature: {{ forecast_obj.avg_temp }} </p>
-        <p>Variance temperature: {{ forecast_obj.var_temp }} </p>
-        <p>Average wind speed: {{ forecast_obj.avg_wind_speed }} </p>
-        <p>Variance wind speed: {{ forecast_obj.var_wind_speed }} </p>
+        <p>Average min temperature: {{ forecast_obj.avg_temp_min }} °C</p>
+        <p>Variance min temperature: {{ forecast_obj.var_temp_min }} °C</p>
+        <p>Average max temperature: {{ forecast_obj.avg_temp_max }} °C</p>
+        <p>Variance max temperature: {{ forecast_obj.var_temp_max }} °C</p>
+        <p>Average temperature: {{ forecast_obj.avg_temp }} °C</p>
+        <p>Variance temperature: {{ forecast_obj.var_temp }} °C</p>
+        <p>Average wind speed: {{ forecast_obj.avg_wind_speed }} kph</p>
+        <p>Variance wind speed: {{ forecast_obj.var_wind_speed }} kph</p>
         <p>Summary: {{ forecast_obj.summary }} </p>
       {% endfor %}
   {% endfor %}
