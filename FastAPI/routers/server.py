@@ -48,7 +48,6 @@ async def submit_form(request: Request, city: str, days: int):
 
         results = forecast_val["details"]["value"]
 
-        # TODO sprawdz czy daty z drugiego serwisu sa takie same!
         for res in results:
             info = fetched_data.get(res.date, [])
             info.append(res)
