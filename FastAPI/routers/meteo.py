@@ -27,9 +27,13 @@ router = APIRouter()
 # @router.get("/weather")
 # async def submit_form():
 #
+class MeteoWeather:
+
+    def get_forecast(self, city_name: str, days: int):
+        ...
 
 
-@router.get("/weather/{city}")
+@router.get("/meteo/{city}")
 async def get_london(city: str):
     params = {
         'key': API_KEY,
