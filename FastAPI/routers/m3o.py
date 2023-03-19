@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from config.settings import get_settings
 from json import JSONDecodeError
 from schemas.responses import ForecastExternalResponse
-
+from starlette.responses import JSONResponse
 
 m3o_source_config = get_settings().m3o_source_config
 URL = m3o_source_config.url
@@ -25,11 +25,12 @@ class M3OForecast:
         )
 
         forecast_val = {"is_error": False, "details": {}}
+        response = response.json()
 
-        if response.status_code != 200:
+        if response["code"] != 200:
             forecast_val["is_error"] = True
             forecast_val["details"]["message"] = "Error while connecting to external API. Contact your administrator."
-            print("Status code when finding city by name: ", response.status_code)
+            print("Status code when finding city by name: ", response["code"])
             try:
                 print(response.json())
             except JSONDecodeError:
@@ -37,7 +38,7 @@ class M3OForecast:
 
             return forecast_val
 
-        daily_forecast = response.json()["forecast"]
+        daily_forecast = response["forecast"]
         forecast_val["details"]["value"] = []
         results = forecast_val["details"]["value"]
 
@@ -54,3 +55,20 @@ class M3OForecast:
             )
 
         return forecast_val
+
+
+@router.post("/m3o/{city_name}")
+async def get_forecast_by_city_name(city_name: str, days: int):
+    response = requests.post(
+        URL,
+        json={
+            "location": city_name,
+            "days": days
+        },
+        headers={"Authorization": f'Bearer {API_KEY}'}
+    ).json()
+
+    if response["code"] != 200:
+        return JSONResponse(status_code=response["code"], content=response)
+
+    return response
