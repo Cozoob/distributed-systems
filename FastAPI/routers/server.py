@@ -5,6 +5,7 @@ from starlette.templating import Jinja2Templates
 from routers.meteo import MeteoForecast
 from routers.m3o import M3OForecast
 from schemas.responses import WeatherResponse
+from config.settings import USERS_API_KEYS
 
 router = APIRouter()
 templates = Jinja2Templates(directory="./websites")
@@ -18,8 +19,15 @@ async def root(request: Request) -> Response:
 
 
 @router.get("/weather", response_class=HTMLResponse)
-async def submit_form(request: Request, city: str, days: int):
+async def submit_form(request: Request, city: str, days: int, api_key: str):
     global summary
+
+    if api_key not in USERS_API_KEYS:
+        return templates.TemplateResponse(ERROR_PAGE, {
+            "request": request,
+            "message": "The api key is incorrect!"
+        })
+
     if not city.isalpha():
         # check if contains only letters
         return templates.TemplateResponse(ERROR_PAGE, {
@@ -65,9 +73,12 @@ async def submit_form(request: Request, city: str, days: int):
 
         # variances
         var_temp = round(sum(map(lambda response: (response.temp - avg_temp) ** 2, info)) / amount_of_data, 5)
-        var_min_temp = round(sum(map(lambda response: (response.temp_min - avg_min_temp) ** 2, info)) / amount_of_data, 5)
-        var_max_temp = round(sum(map(lambda response: (response.temp_max - avg_max_temp) ** 2, info)) / amount_of_data, 5)
-        var_wind_speed = round(sum(map(lambda response: (response.wind_speed - avg_wind_speed) ** 2, info)) / amount_of_data, 5)
+        var_min_temp = round(sum(map(lambda response: (response.temp_min - avg_min_temp) ** 2, info)) / amount_of_data,
+                             5)
+        var_max_temp = round(sum(map(lambda response: (response.temp_max - avg_max_temp) ** 2, info)) / amount_of_data,
+                             5)
+        var_wind_speed = round(
+            sum(map(lambda response: (response.wind_speed - avg_wind_speed) ** 2, info)) / amount_of_data, 5)
 
         for response in info:
             if response.summary:

@@ -3,6 +3,7 @@ from yaml import safe_load
 from pydantic import BaseSettings, Field
 from typing import Any
 
+USERS_API_KEYS = ["896513d6-2653-45f0-ab58-99219c3dfabc"]
 
 class UvicornSettings(BaseSettings):
     """ Setting for uvicorn server """
@@ -28,6 +29,7 @@ class Settings(BaseSettings):
     api_config: APIConfigSettings
     meteo_source_config: SourceSettings
     m3o_source_config: SourceSettings
+    uuid_source_config: SourceSettings
 
 
 def load_from_yaml() -> Any:

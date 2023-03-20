@@ -1,6 +1,6 @@
 import requests
 from fastapi import APIRouter
-from config.settings import get_settings
+from config.settings import get_settings, USERS_API_KEYS
 from json import JSONDecodeError
 from schemas.responses import ForecastExternalResponse
 from starlette.responses import JSONResponse
@@ -91,7 +91,10 @@ class MeteoForecast:
 
 
 @router.get("/meteo/{city_name}")
-async def get_city_id(city_name: str, days: int):
+async def get_city_id(city_name: str, days: int, api_key: str):
+    if api_key not in USERS_API_KEYS:
+        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"message": "Invalid API Key"})
+
     if not (1 <= days <= 5):
         return JSONResponse(status_code=status.HTTP_406_NOT_ACCEPTABLE, content={
             "code": status.HTTP_406_NOT_ACCEPTABLE,

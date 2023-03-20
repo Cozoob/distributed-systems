@@ -2,8 +2,10 @@ import uvicorn
 
 from fastapi import FastAPI
 from config.settings import get_settings
-from routers import server, meteo, m3o
+from routers import server, meteo, m3o, uuid
 from starlette.middleware.cors import CORSMiddleware
+
+routers_to_include = [server.router, meteo.router, m3o.router, uuid.router]
 
 api_config = get_settings().api_config
 
@@ -19,9 +21,8 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app.include_router(server.router)
-app.include_router(meteo.router)
-app.include_router(m3o.router)
+for router in routers_to_include:
+    app.include_router(router)
 
 if __name__ == '__main__':
     settings = get_settings()

@@ -13,3 +13,6 @@ meteo_source_config:
 m3o_source_config:
   url: https://api.m3o.com/v1/weather/Forecast
   api_key: MmNmOGVmYTQtOTMxNC00MzkwLWE5ODYtNTUwNDVhMGIzZDMz
+uuid_source_config:
+  url: http://httpbin.org/uuid
+  api_key: None
