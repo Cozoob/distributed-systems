@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>City weather</title>
+</head>
+<body>
+    <h1>City: {{ city }}</h1>
+  {% for date in data.keys() %}
+        <h2>Date: {{ date }}</h2>
+      {% for forecast_obj in data[date] %}
+        <p>Average min temperature: {{ forecast_obj.avg_temp_min }} °C</p>
+        <p>Variance min temperature: {{ forecast_obj.var_temp_min }} °C</p>
+        <p>Average max temperature: {{ forecast_obj.avg_temp_max }} °C</p>
+        <p>Variance max temperature: {{ forecast_obj.var_temp_max }} °C</p>
+        <p>Average temperature: {{ forecast_obj.avg_temp }} °C</p>
+        <p>Variance temperature: {{ forecast_obj.var_temp }} °C</p>
+        <p>Average wind speed: {{ forecast_obj.avg_wind_speed }} kph</p>
+        <p>Variance wind speed: {{ forecast_obj.var_wind_speed }} kph</p>
+        <p>Summary: {{ forecast_obj.summary }} </p>
+      {% endfor %}
+  {% endfor %}
+  <form method="get" action="/">
+      <input type="submit" value="Check other cities' weather :)">
+  </form>
+</body>
+</html>
