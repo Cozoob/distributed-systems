@@ -9,6 +9,7 @@ if ray.is_initialized:
     ray.shutdown()
 ray.init(logging_level=logging.ERROR)
 
+print('TASK 1')
 print('IT WORKS! Wait patiently :)')
 
 # local bubble sort method
