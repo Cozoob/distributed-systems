@@ -1,0 +1,12 @@
+.idea
+.gradle
+venv
+gradle
+
+server/build
+
+SmartHouse
+client/SmartHouse
+
+gradlew
+gradlew.bat
