@@ -127,9 +127,96 @@ def process_doors_list():
         if user_input == "q":
             break
         elif user_input == "h":
-            get_help_for_robots_list()
-        # elif user_input in Robots.keys():
-        #     process_robot(user_input)
+            get_help_for_doors()
+        elif user_input in NormalDoorsSensors.keys():
+            process_normal_door(user_input)
+        elif user_input in GarageDoorsSensors.keys():
+            process_garage_door(user_input)
+        else:
+            print("Unrecognized command... Write \'h\' if you need help.")
+
+def get_help_for_normal_door():
+    get_help_for_sensor()
+    print("isOpen -> Check if door is open.")
+    print("open -> Open door.")
+    print("close -> Close door.")
+    print("isLocked -> Check if door is locked.")
+    print("lock -> Lock door.")
+    print("unlock -> Unloock door.")
+
+def process_normal_door(normal_door_id):
+    get_help_for_normal_door()
+    while True:
+        user_input = input(f"doors/{normal_door_id}>")
+        if user_input == "q":
+            break
+        elif user_input == "h":
+            get_help_for_normal_door()
+        elif user_input == "name":
+            print(NormalDoorsSensors[normal_door_id].getName())
+        elif user_input == "type":
+            print(NormalDoorsSensors[normal_door_id].getType())
+        elif user_input == "type":
+            print(NormalDoorsSensors[normal_door_id].getType())
+        elif user_input == "isOpen":
+            print(NormalDoorsSensors[normal_door_id].isOpen())
+        elif user_input == "open":
+            try:
+                NormalDoorsSensors[normal_door_id].doorOpened()
+            except SmartHouse.DoorSensorException as e:
+                print(f"{e.errorTime.hour}:{e.errorTime.minute}:{e.errorTime.second} | {e.reason}")
+        elif user_input == "close":
+            try:
+                NormalDoorsSensors[normal_door_id].doorClosed()
+            except SmartHouse.DoorSensorException as e:
+                print(f"{e.errorTime.hour}:{e.errorTime.minute}:{e.errorTime.second} | {e.reason}")
+
+        elif user_input == "lock":
+            try:
+                NormalDoorsSensors[normal_door_id].lockDoor()
+            except SmartHouse.DoorSensorException as e:
+                print(f"{e.errorTime.hour}:{e.errorTime.minute}:{e.errorTime.second} | {e.reason}")
+        elif user_input == "unlock":
+            try:
+                NormalDoorsSensors[normal_door_id].unlockDoor()
+            except SmartHouse.DoorSensorException as e:
+                print(f"{e.errorTime.hour}:{e.errorTime.minute}:{e.errorTime.second} | {e.reason}")
+        elif user_input == "isLocked":
+            print(NormalDoorsSensors[normal_door_id].isLocked())
+        else:
+            print("Unrecognized command... Write \'h\' if you need help.")
+
+def get_help_for_garage_door():
+    get_help_for_sensor()
+    print("isOpen -> Check if door is open.")
+    print("open -> Open garage door.")
+    print("close -> Close garage door.")
+
+def process_garage_door(garage_door_id):
+    # TODO
+    get_help_for_garage_door()
+    while True:
+        user_input = input(f"doors/{garage_door_id}>")
+        if user_input == "q":
+            break
+        elif user_input == "h":
+            get_help_for_garage_door()
+        elif user_input == "name":
+            print(GarageDoorsSensors[garage_door_id].getName())
+        elif user_input == "type":
+            print(GarageDoorsSensors[garage_door_id].getType())
+        elif user_input == "isOpen":
+            print(GarageDoorsSensors[garage_door_id].isOpen())
+        elif user_input == "open":
+            try:
+                GarageDoorsSensors[garage_door_id].openGarageDoor()
+            except SmartHouse.DoorSensorException as e:
+                print(f"{e.errorTime.hour}:{e.errorTime.minute}:{e.errorTime.second} | {e.reason}")
+        elif user_input == "close":
+            try:
+                GarageDoorsSensors[garage_door_id].closeGarageDoor()
+            except SmartHouse.DoorSensorException as e:
+                print(f"{e.errorTime.hour}:{e.errorTime.minute}:{e.errorTime.second} | {e.reason}")
         else:
             print("Unrecognized command... Write \'h\' if you need help.")
 
