@@ -143,7 +143,7 @@ if 'OutOfEnergyException' not in _M_SmartHouse.__dict__:
 
     _M_SmartHouse._t_OutOfEnergyException = IcePy.defineException('::SmartHouse::OutOfEnergyException', OutOfEnergyException, (), False, None, (
         ('errorTime', (), _M_SmartHouse._t_TimeOfDay, False, 0),
-        ('message', (), IcePy._t_string, False, 0)
+        ('message', (), IcePy._t_string, True, 1)
     ))
     OutOfEnergyException._ice_type = _M_SmartHouse._t_OutOfEnergyException
 
@@ -169,7 +169,7 @@ if 'InvalidPositionException' not in _M_SmartHouse.__dict__:
 
     _M_SmartHouse._t_InvalidPositionException = IcePy.defineException('::SmartHouse::InvalidPositionException', InvalidPositionException, (), False, None, (
         ('errorTime', (), _M_SmartHouse._t_TimeOfDay, False, 0),
-        ('message', (), IcePy._t_string, False, 0)
+        ('message', (), IcePy._t_string, True, 2)
     ))
     InvalidPositionException._ice_type = _M_SmartHouse._t_InvalidPositionException
 
@@ -195,7 +195,7 @@ if 'RobotNotActiveException' not in _M_SmartHouse.__dict__:
 
     _M_SmartHouse._t_RobotNotActiveException = IcePy.defineException('::SmartHouse::RobotNotActiveException', RobotNotActiveException, (), False, None, (
         ('errorTime', (), _M_SmartHouse._t_TimeOfDay, False, 0),
-        ('message', (), IcePy._t_string, False, 0)
+        ('message', (), IcePy._t_string, True, 3)
     ))
     RobotNotActiveException._ice_type = _M_SmartHouse._t_RobotNotActiveException
 
@@ -221,7 +221,7 @@ if 'RobotAlreadyActiveException' not in _M_SmartHouse.__dict__:
 
     _M_SmartHouse._t_RobotAlreadyActiveException = IcePy.defineException('::SmartHouse::RobotAlreadyActiveException', RobotAlreadyActiveException, (), False, None, (
         ('errorTime', (), _M_SmartHouse._t_TimeOfDay, False, 0),
-        ('message', (), IcePy._t_string, False, 0)
+        ('message', (), IcePy._t_string, True, 4)
     ))
     RobotAlreadyActiveException._ice_type = _M_SmartHouse._t_RobotAlreadyActiveException
 
@@ -454,8 +454,8 @@ if 'RobotPrx' not in _M_SmartHouse.__dict__:
     Robot._op_getEnergy = IcePy.Operation('getEnergy', Ice.OperationMode.Normal, Ice.OperationMode.Normal, False, None, (), (), (), ((), IcePy._t_byte, False, 0), ())
     Robot._op_getPositionX = IcePy.Operation('getPositionX', Ice.OperationMode.Normal, Ice.OperationMode.Normal, False, None, (), (), (), ((), IcePy._t_float, False, 0), ())
     Robot._op_getPositionY = IcePy.Operation('getPositionY', Ice.OperationMode.Normal, Ice.OperationMode.Normal, False, None, (), (), (), ((), IcePy._t_float, False, 0), ())
-    Robot._op_move = IcePy.Operation('move', Ice.OperationMode.Normal, Ice.OperationMode.Normal, False, None, (), (((), _M_SmartHouse._t_Movement, False, 0),), (), None, ())
-    Robot._op_setNewPosition = IcePy.Operation('setNewPosition', Ice.OperationMode.Normal, Ice.OperationMode.Normal, False, None, (), (((), _M_SmartHouse._t_Position, False, 0),), (), None, ())
+    Robot._op_move = IcePy.Operation('move', Ice.OperationMode.Normal, Ice.OperationMode.Normal, False, None, (), (((), _M_SmartHouse._t_Movement, False, 0),), (), None, (_M_SmartHouse._t_OutOfEnergyException, _M_SmartHouse._t_InvalidPositionException, _M_SmartHouse._t_RobotNotActiveException))
+    Robot._op_setNewPosition = IcePy.Operation('setNewPosition', Ice.OperationMode.Normal, Ice.OperationMode.Normal, False, None, (), (((), _M_SmartHouse._t_Position, False, 0),), (), None, (_M_SmartHouse._t_InvalidPositionException, _M_SmartHouse._t_RobotNotActiveException))
     Robot._op_turnOff = IcePy.Operation('turnOff', Ice.OperationMode.Normal, Ice.OperationMode.Normal, False, None, (), (), (), None, ())
     Robot._op_turnOn = IcePy.Operation('turnOn', Ice.OperationMode.Normal, Ice.OperationMode.Normal, False, None, (), (), (), None, ())
 

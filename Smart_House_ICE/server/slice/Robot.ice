@@ -12,22 +12,22 @@ module SmartHouse {
 
     exception OutOfEnergyException {
         TimeOfDay errorTime;
-        string message = "Cannot perform movement - robot does not have enough energy.";
+        optional(1) string message = "Cannot perform movement - robot does not have enough energy.";
     };
 
     exception InvalidPositionException {
         TimeOfDay errorTime;
-        string message = "Cannot set new position - invalid position value.";
+        optional(2) string message = "Cannot set new position - invalid position value.";
     };
 
     exception RobotNotActiveException  {
         TimeOfDay errorTime;
-        string message = "Cannot perform action - robot is not active.";
+        optional(3) string message = "Cannot perform action - robot is not active.";
     };
 
     exception RobotAlreadyActiveException  {
         TimeOfDay errorTime;
-        string message = "Cannot activate robot - robot is already active.";
+        optional(4) string message = "Cannot activate robot - robot is already active.";
     };
 
     enum Movement {
@@ -47,8 +47,8 @@ module SmartHouse {
         byte getEnergy();
         float getPositionX();
         float getPositionY();
-        void move(Movement m);
-        void setNewPosition(Position p);
+        void move(Movement m) throws OutOfEnergyException, InvalidPositionException, RobotNotActiveException;
+        void setNewPosition(Position p) throws InvalidPositionException, RobotNotActiveException;
         void turnOff();
         void turnOn();
     };
