@@ -4,11 +4,15 @@
 
 module SmartHouse {
 
+    // Struct to collect time for all exceptions defined in the module
+
     struct TimeOfDay {
         short hour;
         short minute;
         short second;
     };
+
+    // Robot
 
     exception OutOfEnergyException {
         TimeOfDay errorTime;
@@ -51,6 +55,62 @@ module SmartHouse {
         void setNewPosition(Position p) throws InvalidPositionException, RobotNotActiveException;
         void turnOff();
         void turnOn();
+    };
+
+    // Sensors
+
+    interface Sensor {
+        string getName();
+        string getType();
+        void setCurrentTime();
+    };
+
+    // GasSensor
+
+    exception GasSensorException {
+        TimeOfDay errorTime;
+        string reason;
+    };
+
+    interface GasSensor extends Sensor {
+        void gasDetected(double level) throws GasSensorException;
+        double getGasLevel();
+    };
+
+    // Temperature Sensor
+
+    exception TemperatureSensorException {
+        TimeOfDay errorTime;
+        string reason;
+    };
+
+    interface TemperatureSensor extends Sensor {
+        void temperatureChanged(double temperature) throws TemperatureSensorException;
+        double getTemperature();
+    };
+
+    // Door Sensors
+
+    exception DoorSensorException {
+        TimeOfDay errorTime;
+        string reason;
+    };
+
+    interface DoorSensor extends Sensor {
+        bool isOpen();
+        void doorOpened() throws DoorSensorException;
+        void doorClosed() throws DoorSensorException;
+    };
+
+    interface NormalDoorSensor extends DoorSensor {
+        bool isLocked();
+        void lockDoor() throws DoorSensorException;
+        void unlockDoor() throws DoorSensorException;
+    };
+
+    interface GarageDoorSensor extends DoorSensor {
+        void openGarageDoor() throws DoorSensorException;
+        void closeGarageDoor() throws DoorSensorException;
     };
 };
 
