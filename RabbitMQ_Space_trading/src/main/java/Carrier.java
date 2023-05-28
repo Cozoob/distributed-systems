@@ -152,6 +152,19 @@ public class Carrier {
         }
 
         System.out.println("Listening to all chosen services...");
+        System.out.println("If you want close just type \"exit\"");
+
+        while(true) {
+            // read msg
+            System.out.print("\nEnter services:\n");
+            message = br.readLine();
+
+            if("exit".equalsIgnoreCase(message)) {
+                channel.close();
+                connection.close();
+                break;
+            }
+        }
 
     }
 

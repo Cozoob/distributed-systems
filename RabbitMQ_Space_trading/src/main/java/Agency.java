@@ -56,6 +56,12 @@ public class Agency {
                 continue;
             }
 
+            if("exit".equalsIgnoreCase(message)) {
+                channel.close();
+                connection.close();
+                break;
+            }
+
             checker = message.replaceAll("[01]", "");
             if(message.length() != 3 || !checker.isBlank()) {
                 System.out.println("Invalid argument!");
@@ -105,6 +111,7 @@ public class Agency {
         System.out.println("_X_ - carry cargo (1-yes, 0-no)");
         System.out.println("__X - set a satellite (1-yes, 0-no)\n");
         System.out.println("If you want to see this help message again just type \"help\"");
+        System.out.println("If you want to exit just type \"exit\"");
     }
 
 }
