@@ -1,9 +1,7 @@
-import com.rabbitmq.client.BuiltinExchangeType;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.*;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
@@ -26,17 +24,30 @@ public class Agency {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
-        // queues
+        // queues for services
         channel.queueDeclare(CARRY_PEOPLE_KEY, false, false, false, null);
         channel.queueDeclare(CARRY_CARGO_KEY, false, false, false, null);
         channel.queueDeclare(SET_SATELLITE_KEY, false, false, false, null);
+        // queue for approval
+        channel.queueDeclare(ID, false, false, false, null);
+
+        // handler for approval queue
+        Consumer consumer = new DefaultConsumer(channel) {
+            @Override
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+                String message = new String(body, StandardCharsets.UTF_8);
+                System.out.println(message);
+                channel.basicAck(envelope.getDeliveryTag(), false);
+            }
+        };
+        channel.basicConsume(ID, false, consumer);
 
         // getting services
         printHelpMessage();
         String message, checker, args[], peopleServiceId, cargoServiceId, satelliteServiceId;
         while(true) {
             // read msg
-            System.out.print("\nEnter services: ");
+            System.out.print("\nEnter services:\n");
             message = br.readLine();
 
             // check message
@@ -58,20 +69,24 @@ public class Agency {
                 // carry people
                 // id of agency : id of current service
                 peopleServiceId = ID + ":p" + System.currentTimeMillis();
+                System.out.println("Service ID (carry people) = " + peopleServiceId);
                 channel.basicPublish("", CARRY_PEOPLE_KEY, null, peopleServiceId.getBytes(StandardCharsets.UTF_8));
             }
 
             if(args[1].equals("1")) {
                 // carry cargo
                 cargoServiceId = ID + ":c" + System.currentTimeMillis();
+                System.out.println("Service ID (carry cargo) = " + cargoServiceId);
                 channel.basicPublish("", CARRY_CARGO_KEY, null, cargoServiceId.getBytes(StandardCharsets.UTF_8));
             }
 
             if(args[2].equals("1")) {
                 // set a satellite
-                satelliteServiceId = ID + ":c" + System.currentTimeMillis();
+                satelliteServiceId = ID + ":s" + System.currentTimeMillis();
+                System.out.println("Service ID (set satellite) = " + satelliteServiceId);
                 channel.basicPublish("", SET_SATELLITE_KEY, null, satelliteServiceId.getBytes(StandardCharsets.UTF_8));
             }
+            System.out.println("Services published...");
         }
 
     }

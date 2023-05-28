@@ -63,14 +63,12 @@ public class Carrier {
 
         channel.basicQos(1);
 
-        // queues
+        // queues for services
         channel.queueDeclare(CARRY_PEOPLE_KEY, false, false, false, null);
         channel.queueDeclare(CARRY_CARGO_KEY, false, false, false, null);
         channel.queueDeclare(SET_SATELLITE_KEY, false, false, false, null);
 
-        // queue & bind
-        String queueName;
-
+        // queues & binds
         if(args[0].equals("1")) {
             // carry people
             // consumer (message handling)
@@ -86,9 +84,13 @@ public class Carrier {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
                     channel.basicAck(envelope.getDeliveryTag(), false);
                     System.out.println("Carrier(" + ID + ") finished carrying people from agency(" +  agencyId + ")");
-                    // TODO
+
+                    // send approval for agency
+                    String approvalMessage = "Task(" + message + ") approved by " + ID + ".";
+                    channel.basicPublish("", agencyId, null, approvalMessage.getBytes(StandardCharsets.UTF_8));
                 }
             };
 
@@ -112,7 +114,10 @@ public class Carrier {
                     }
                     channel.basicAck(envelope.getDeliveryTag(), false);
                     System.out.println("Carrier(" + ID + ") finished carrying cargo from agency(" +  agencyId + ")");
-                    // TODO
+
+                    // send approval for agency
+                    String approvalMessage = "Task(" + message + ") approved by " + ID + ".";
+                    channel.basicPublish("", agencyId, null, approvalMessage.getBytes(StandardCharsets.UTF_8));
                 }
             };
 
@@ -136,7 +141,10 @@ public class Carrier {
                     }
                     channel.basicAck(envelope.getDeliveryTag(), false);
                     System.out.println("Carrier(" + ID + ") finished setting satellite from agency(" +  agencyId + ")");
-                    // TODO
+
+                    // send approval for agency
+                    String approvalMessage = "Task(" + message + ") approved by " + ID + ".";
+                    channel.basicPublish("", agencyId, null, approvalMessage.getBytes(StandardCharsets.UTF_8));
                 }
             };
 
