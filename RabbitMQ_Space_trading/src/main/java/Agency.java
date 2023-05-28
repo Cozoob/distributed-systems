@@ -9,7 +9,9 @@ public class Agency {
     private static final String CARRY_PEOPLE_KEY = "people";
     private static final String CARRY_CARGO_KEY = "cargo";
     private static final String SET_SATELLITE_KEY = "satellite";
-
+    private static final String ADMIN_KEY = "admin";
+    private static final String ADMIN_EXCHANGE = "admin_exchange";
+    private static final String ADMIN_KEY_FOR_AGENCY = "admin.agencies";
 
     public static void main(String[] argv) throws Exception {
         // info, get name of Agency
@@ -30,6 +32,23 @@ public class Agency {
         channel.queueDeclare(SET_SATELLITE_KEY, false, false, false, null);
         // queue for approval
         channel.queueDeclare(ID, false, false, false, null);
+        // queue for sending copies to admin
+        channel.queueDeclare(ADMIN_KEY, false, false, false , null);
+
+        // exchange and queue to get messages from admin
+        channel.exchangeDeclare(ADMIN_EXCHANGE, BuiltinExchangeType.TOPIC);
+        String adminQueueName = channel.queueDeclare().getQueue();
+        channel.queueBind(adminQueueName, ADMIN_EXCHANGE, ADMIN_KEY_FOR_AGENCY);
+
+        // handler for admin messages
+        Consumer adminConsumer = new DefaultConsumer(channel) {
+            @Override
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+                String message = new String(body, StandardCharsets.UTF_8);
+                System.out.println("FROM ADMIN: " + message);
+            }
+        };
+        channel.basicConsume(adminQueueName, true, adminConsumer);
 
         // handler for approval queue
         Consumer consumer = new DefaultConsumer(channel) {
@@ -77,6 +96,8 @@ public class Agency {
                 peopleServiceId = ID + ":p" + System.currentTimeMillis();
                 System.out.println("Service ID (carry people) = " + peopleServiceId);
                 channel.basicPublish("", CARRY_PEOPLE_KEY, null, peopleServiceId.getBytes(StandardCharsets.UTF_8));
+                // Copy for administrator
+                channel.basicPublish("", ADMIN_KEY, null, peopleServiceId.getBytes(StandardCharsets.UTF_8));
             }
 
             if(args[1].equals("1")) {
@@ -84,6 +105,8 @@ public class Agency {
                 cargoServiceId = ID + ":c" + System.currentTimeMillis();
                 System.out.println("Service ID (carry cargo) = " + cargoServiceId);
                 channel.basicPublish("", CARRY_CARGO_KEY, null, cargoServiceId.getBytes(StandardCharsets.UTF_8));
+                // Copy for administrator
+                channel.basicPublish("", ADMIN_KEY, null, cargoServiceId.getBytes(StandardCharsets.UTF_8));
             }
 
             if(args[2].equals("1")) {
@@ -91,6 +114,8 @@ public class Agency {
                 satelliteServiceId = ID + ":s" + System.currentTimeMillis();
                 System.out.println("Service ID (set satellite) = " + satelliteServiceId);
                 channel.basicPublish("", SET_SATELLITE_KEY, null, satelliteServiceId.getBytes(StandardCharsets.UTF_8));
+                // Copy for administrator
+                channel.basicPublish("", ADMIN_KEY, null, satelliteServiceId.getBytes(StandardCharsets.UTF_8));
             }
             System.out.println("Services published...");
         }

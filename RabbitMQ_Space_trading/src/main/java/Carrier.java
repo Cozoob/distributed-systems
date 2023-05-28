@@ -16,6 +16,9 @@ public class Carrier {
     private static final String CARRY_PEOPLE_KEY = "people";
     private static final String CARRY_CARGO_KEY = "cargo";
     private static final String SET_SATELLITE_KEY = "satellite";
+    private static final String ADMIN_KEY = "admin";
+    private static final String ADMIN_EXCHANGE = "admin_exchange";
+    private static final String ADMIN_KEY_FOR_CARRIER = "admin.carriers";
 
     public static void main(String[] argv) throws Exception {
         // info, get name of Carrier
@@ -67,6 +70,24 @@ public class Carrier {
         channel.queueDeclare(CARRY_PEOPLE_KEY, false, false, false, null);
         channel.queueDeclare(CARRY_CARGO_KEY, false, false, false, null);
         channel.queueDeclare(SET_SATELLITE_KEY, false, false, false, null);
+        // queue for admin
+        channel.queueDeclare(ADMIN_KEY, false, false, false , null);
+
+        // exchange and queue to get messages from admin
+        channel.exchangeDeclare(ADMIN_EXCHANGE, BuiltinExchangeType.TOPIC);
+        String adminQueueName = channel.queueDeclare().getQueue();
+        channel.queueBind(adminQueueName, ADMIN_EXCHANGE, ADMIN_KEY_FOR_CARRIER);
+
+        // handler for admin messages
+        Consumer adminConsumer = new DefaultConsumer(channel) {
+            @Override
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+                String message = new String(body, StandardCharsets.UTF_8);
+                System.out.println("FROM ADMIN: " + message);
+            }
+        };
+        channel.basicConsume(adminQueueName, true, adminConsumer);
+
 
         // queues & binds
         if(args[0].equals("1")) {
@@ -91,6 +112,8 @@ public class Carrier {
                     // send approval for agency
                     String approvalMessage = "Task(" + message + ") approved by " + ID + ".";
                     channel.basicPublish("", agencyId, null, approvalMessage.getBytes(StandardCharsets.UTF_8));
+                    // Copy for administrator
+                    channel.basicPublish("", ADMIN_KEY, null, approvalMessage.getBytes(StandardCharsets.UTF_8));
                 }
             };
 
@@ -118,6 +141,8 @@ public class Carrier {
                     // send approval for agency
                     String approvalMessage = "Task(" + message + ") approved by " + ID + ".";
                     channel.basicPublish("", agencyId, null, approvalMessage.getBytes(StandardCharsets.UTF_8));
+                    // Copy for administrator
+                    channel.basicPublish("", ADMIN_KEY, null, approvalMessage.getBytes(StandardCharsets.UTF_8));
                 }
             };
 
@@ -145,6 +170,8 @@ public class Carrier {
                     // send approval for agency
                     String approvalMessage = "Task(" + message + ") approved by " + ID + ".";
                     channel.basicPublish("", agencyId, null, approvalMessage.getBytes(StandardCharsets.UTF_8));
+                    // Copy for administrator
+                    channel.basicPublish("", ADMIN_KEY, null, approvalMessage.getBytes(StandardCharsets.UTF_8));
                 }
             };
 
@@ -156,7 +183,7 @@ public class Carrier {
 
         while(true) {
             // read msg
-            System.out.print("\nEnter services:\n");
+            System.out.print("\nEnter command:\n");
             message = br.readLine();
 
             if("exit".equalsIgnoreCase(message)) {
