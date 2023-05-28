@@ -335,7 +335,6 @@ with Ice.initialize(sys.argv) as communicator:
     base4 = communicator.stringToProxy("temperatureSensor/temperatureSensor1:tcp -h 127.0.0.1 -p 1000")
     temperatureSensor1 = SmartHouse.TemperatureSensorPrx.checkedCast(base4)
     TemperatureSensors["ts1"] = temperatureSensor1
-`
 
     # Normal doors sensors
     base5 = communicator.stringToProxy("normalDoorSensor/normalDoorSensor1:tcp -h 127.0.0.1 -p 1000")
