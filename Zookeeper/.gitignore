@@ -4,6 +4,8 @@
 # Gradle
 .gradle/
 build/
+gradlew.bat
+gradlew
 
 # ZooKeeper
 data/
