@@ -1,0 +1,15 @@
+# IntelliJ IDEA
+.idea/
+
+# Gradle
+.gradle/
+build/
+
+# ZooKeeper
+data/
+datalog/
+version-2/
+*.snap
+*.myid
+*.log
+apache-zookeeper-3.8.0-bin
